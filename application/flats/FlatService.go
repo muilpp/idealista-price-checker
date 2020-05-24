@@ -13,6 +13,18 @@ import (
 	"strings"
 )
 
+const (
+	flatEndpoint   = "https://api.idealista.com/3.5/es/search"
+	geolocation    = "41.6061846,2.2703413"
+	marginInMeters = "4000"
+	flatMinSize    = "75"
+	flatMaxSize    = "90"
+	propertyType   = "homes"
+	country        = "es"
+	rentType       = "rent"
+	saleType       = "sale"
+)
+
 type flatService interface {
 	GetAllFlats() bool
 }
@@ -27,28 +39,28 @@ func NewFlatService() flatService {
 }
 
 func (f flatServiceImpl) GetAllFlats() bool {
-	rentalFlatsSlice := f.getFlats("rent")
-	saleFlatsSlice := f.getFlats("sale")
+	rentalFlatsSlice := f.getFlats(rentType)
+	saleFlatsSlice := f.getFlats(saleType)
 
-	f.flatRepository.Add(rentalFlatsSlice, "rent")
-	f.flatRepository.Add(saleFlatsSlice, "sale")
+	f.flatRepository.Add(rentalFlatsSlice, rentType)
+	f.flatRepository.Add(saleFlatsSlice, saleType)
 
 	return true
 }
 
 func (f flatServiceImpl) getFlats(operation string) []domain.Flat {
 	data := url.Values{}
-	data.Set("country", "es")
+	data.Set("country", country)
 	data.Set("operation", operation)
-	data.Set("propertyType", "homes")
-	data.Set("center", "41.6061846,2.2703413")
-	data.Set("distance", "4000")
-	data.Set("minSize", "75")
-	data.Set("maxSize", "90")
+	data.Set("propertyType", propertyType)
+	data.Set("center", geolocation)
+	data.Set("distance", marginInMeters)
+	data.Set("minSize", flatMinSize)
+	data.Set("maxSize", flatMaxSize)
 
 	var bearer = "Bearer " + f.authentication.GetToken()
 
-	req, err := http.NewRequest("POST", "https://api.idealista.com/3.5/es/search", strings.NewReader(data.Encode()))
+	req, err := http.NewRequest("POST", flatEndpoint, strings.NewReader(data.Encode()))
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Authorization", bearer)
 
