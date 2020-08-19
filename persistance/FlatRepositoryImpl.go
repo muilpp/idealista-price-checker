@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"idealista/domain"
+	"log"
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -11,6 +12,7 @@ import (
 
 type FlatRepository interface {
 	Add([]domain.Flat, string) bool
+	Get(string) []domain.Flat
 }
 
 type flatRepositoryImpl struct{}
@@ -48,4 +50,46 @@ func (f flatRepositoryImpl) Add(flats []domain.Flat, operation string) bool {
 	defer insert.Close()
 
 	return true
+}
+
+func (f flatRepositoryImpl) Get(operation string) []domain.Flat {
+	db, err := sql.Open("mysql", os.Getenv("DB_DATA_SOURCE"))
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	log.Println("Get flats -> ", "select average, area_average, added from "+operation+"_average_price")
+	rows, err := db.Query("select average, area_average, added from " + operation + "_average_price")
+	if err != nil {
+		panic(err.Error())
+	}
+
+	defer rows.Close()
+
+	var average float64
+	var areaAverage float64
+	var added string
+	var flats []domain.Flat
+
+	for rows.Next() {
+		err := rows.Scan(&average, &areaAverage, &added)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Println("Found flat ", &average, &areaAverage, &added)
+		flat := domain.NewFlatWithDate(average, areaAverage, added)
+		flats = append(flats, *flat)
+	}
+
+	err = rows.Err()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if len(flats) > 0 {
+		return flats
+	}
+
+	return nil
 }

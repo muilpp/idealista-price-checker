@@ -26,7 +26,8 @@ const (
 )
 
 type flatService interface {
-	GetAllFlats() bool
+	AddNewFlats() bool
+	GetFlatsFromDatabase(string) []domain.Flat
 }
 
 type flatServiceImpl struct {
@@ -38,9 +39,9 @@ func NewFlatService() flatService {
 	return &flatServiceImpl{persistance.NewFlatRepository(), authentication.NewAuthenticationService()}
 }
 
-func (f flatServiceImpl) GetAllFlats() bool {
-	rentalFlatsSlice := f.getFlats(rentType)
-	saleFlatsSlice := f.getFlats(saleType)
+func (f flatServiceImpl) AddNewFlats() bool {
+	rentalFlatsSlice := f.getFlatsFromIdealista(rentType)
+	saleFlatsSlice := f.getFlatsFromIdealista(saleType)
 
 	f.flatRepository.Add(rentalFlatsSlice, rentType)
 	f.flatRepository.Add(saleFlatsSlice, saleType)
@@ -48,7 +49,7 @@ func (f flatServiceImpl) GetAllFlats() bool {
 	return true
 }
 
-func (f flatServiceImpl) getFlats(operation string) []domain.Flat {
+func (f flatServiceImpl) getFlatsFromIdealista(operation string) []domain.Flat {
 	data := url.Values{}
 	data.Set("country", country)
 	data.Set("operation", operation)
@@ -85,6 +86,13 @@ func (f flatServiceImpl) getFlats(operation string) []domain.Flat {
 			flats = append(flats, *flat)
 		}
 	}
+
+	return flats
+}
+
+func (f flatServiceImpl) GetFlatsFromDatabase(operation string) []domain.Flat {
+	log.Println("Get flats for operation ", operation)
+	flats := f.flatRepository.Get(operation)
 
 	return flats
 }
