@@ -12,7 +12,7 @@ import (
 
 type FlatRepository interface {
 	Add([]domain.Flat, string) bool
-	Get(string) []domain.Flat
+	Get(string, bool) []domain.Flat
 }
 
 type flatRepositoryImpl struct{}
@@ -22,12 +22,7 @@ func NewFlatRepository() FlatRepository {
 }
 
 func (f flatRepositoryImpl) Add(flats []domain.Flat, operation string) bool {
-	db, err := sql.Open("mysql", os.Getenv("DB_DATA_SOURCE"))
-
-	if err != nil {
-		panic(err.Error())
-	}
-
+	db := openDB()
 	defer db.Close()
 
 	var totalSumPrice, totalSumAreaPrice float64
@@ -52,15 +47,17 @@ func (f flatRepositoryImpl) Add(flats []domain.Flat, operation string) bool {
 	return true
 }
 
-func (f flatRepositoryImpl) Get(operation string) []domain.Flat {
-	db, err := sql.Open("mysql", os.Getenv("DB_DATA_SOURCE"))
+func (f flatRepositoryImpl) Get(operation string, getOncePerMonthOnly bool) []domain.Flat {
+	db := openDB()
+	defer db.Close()
 
-	if err != nil {
-		panic(err.Error())
+	query := "select average, area_average, added from " + operation + "_average_price"
+	if getOncePerMonthOnly {
+		query += " where added like '%-01%'"
 	}
 
-	log.Println("Get flats -> ", "select average, area_average, added from "+operation+"_average_price")
-	rows, err := db.Query("select average, area_average, added from " + operation + "_average_price")
+	log.Println("Get flats -> ", query)
+	rows, err := db.Query(query)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -92,4 +89,14 @@ func (f flatRepositoryImpl) Get(operation string) []domain.Flat {
 	}
 
 	return nil
+}
+
+func openDB() *sql.DB {
+	db, err := sql.Open("mysql", os.Getenv("DB_DATA_SOURCE"))
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return db
 }

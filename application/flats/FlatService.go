@@ -27,7 +27,7 @@ const (
 
 type flatService interface {
 	AddNewFlats() bool
-	GetFlatsFromDatabase(string) []domain.Flat
+	GetFlatsFromDatabase(string, bool) []domain.Flat
 }
 
 type flatServiceImpl struct {
@@ -90,9 +90,9 @@ func (f flatServiceImpl) getFlatsFromIdealista(operation string) []domain.Flat {
 	return flats
 }
 
-func (f flatServiceImpl) GetFlatsFromDatabase(operation string) []domain.Flat {
+func (f flatServiceImpl) GetFlatsFromDatabase(operation string, oncePerMonth bool) []domain.Flat {
 	log.Println("Get flats for operation ", operation)
-	flats := f.flatRepository.Get(operation)
+	flats := f.flatRepository.Get(operation, oncePerMonth)
 
 	return flats
 }

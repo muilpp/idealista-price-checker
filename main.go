@@ -27,12 +27,22 @@ func main() {
 	})
 
 	r.GET("/idealista/get-rental-flats", func(c *gin.Context) {
-		rentalFlats := flatService.GetFlatsFromDatabase("rent")
+		rentalFlats := flatService.GetFlatsFromDatabase("rent", false)
+		c.JSON(http.StatusOK, rentalFlats)
+	})
+
+	r.GET("/idealista/get-rental-flats/once-per-month", func(c *gin.Context) {
+		rentalFlats := flatService.GetFlatsFromDatabase("rent", true)
 		c.JSON(http.StatusOK, rentalFlats)
 	})
 
 	r.GET("/idealista/get-sale-flats", func(c *gin.Context) {
-		saleFlats := flatService.GetFlatsFromDatabase("sale")
+		saleFlats := flatService.GetFlatsFromDatabase("sale", false)
+		c.JSON(http.StatusOK, saleFlats)
+	})
+
+	r.GET("/idealista/get-sale-flats/once-per-month", func(c *gin.Context) {
+		saleFlats := flatService.GetFlatsFromDatabase("sale", true)
 		c.JSON(http.StatusOK, saleFlats)
 	})
 
