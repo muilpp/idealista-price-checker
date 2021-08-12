@@ -20,5 +20,6 @@
 # generated build
 idealista
 
+/bin/*
 go.sum
 credentials.env
