@@ -11,13 +11,13 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-type flatRepositoryImpl struct{}
+type mysqlFlatRepository struct{}
 
 func NewFlatRepository() ports.FlatRepository {
-	return &flatRepositoryImpl{}
+	return &mysqlFlatRepository{}
 }
 
-func (f flatRepositoryImpl) Add(flats []domain.Flat, operation string) bool {
+func (f mysqlFlatRepository) Add(flats []domain.Flat, operation string) bool {
 	db := openDB()
 	defer db.Close()
 
@@ -43,7 +43,7 @@ func (f flatRepositoryImpl) Add(flats []domain.Flat, operation string) bool {
 	return true
 }
 
-func (f flatRepositoryImpl) Get(operation string, getOncePerMonthOnly bool) []domain.Flat {
+func (f mysqlFlatRepository) Get(operation string, getOncePerMonthOnly bool) []domain.Flat {
 	db := openDB()
 	defer db.Close()
 

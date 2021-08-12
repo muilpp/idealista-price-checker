@@ -5,7 +5,7 @@ import (
 	"idealista/application/authentication"
 	"idealista/domain"
 	"idealista/domain/ports"
-	"idealista/persistance"
+	"idealista/infrastructure/persistance"
 
 	"io/ioutil"
 	"log"
