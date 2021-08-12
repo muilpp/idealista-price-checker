@@ -4,20 +4,16 @@ import (
 	"database/sql"
 	"fmt"
 	"idealista/domain"
+	"idealista/domain/ports"
 	"log"
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
-type FlatRepository interface {
-	Add([]domain.Flat, string) bool
-	Get(string, bool) []domain.Flat
-}
-
 type flatRepositoryImpl struct{}
 
-func NewFlatRepository() FlatRepository {
+func NewFlatRepository() ports.FlatRepository {
 	return &flatRepositoryImpl{}
 }
 
@@ -74,7 +70,7 @@ func (f flatRepositoryImpl) Get(operation string, getOncePerMonthOnly bool) []do
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Println("Found flat ", &average, &areaAverage, &added)
+
 		flat := domain.NewFlatWithDate(average, areaAverage, added)
 		flats = append(flats, *flat)
 	}

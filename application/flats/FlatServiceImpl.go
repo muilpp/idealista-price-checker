@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"idealista/application/authentication"
 	"idealista/domain"
+	"idealista/domain/ports"
 	"idealista/persistance"
 
 	"io/ioutil"
@@ -25,17 +26,12 @@ const (
 	saleType       = "sale"
 )
 
-type flatService interface {
-	AddNewFlats() bool
-	GetFlatsFromDatabase(string, bool) []domain.Flat
-}
-
 type flatServiceImpl struct {
-	flatRepository persistance.FlatRepository
+	flatRepository ports.FlatRepository
 	authentication authentication.AuthenticationService
 }
 
-func NewFlatService() flatService {
+func NewFlatService() ports.FlatService {
 	return &flatServiceImpl{persistance.NewFlatRepository(), authentication.NewAuthenticationService()}
 }
 
@@ -61,7 +57,7 @@ func (f flatServiceImpl) getFlatsFromIdealista(operation string) []domain.Flat {
 
 	var bearer = "Bearer " + f.authentication.GetToken()
 
-	req, err := http.NewRequest("POST", flatEndpoint, strings.NewReader(data.Encode()))
+	req, _ := http.NewRequest("POST", flatEndpoint, strings.NewReader(data.Encode()))
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Authorization", bearer)
 
