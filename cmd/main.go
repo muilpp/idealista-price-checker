@@ -2,6 +2,7 @@ package main
 
 import (
 	service "idealista/application/flats"
+	"idealista/infrastructure"
 	"log"
 	"net/http"
 	"os"
@@ -29,22 +30,22 @@ func main() {
 		})
 
 		r.GET("/idealista/get-rental-flats", func(c *gin.Context) {
-			rentalFlats := flatService.GetFlatsFromDatabase("rent", false)
+			rentalFlats := flatService.GetFlatsFromDatabase("rent", false, false)
 			c.JSON(http.StatusOK, rentalFlats)
 		})
 
 		r.GET("/idealista/get-rental-flats/once-per-month", func(c *gin.Context) {
-			rentalFlats := flatService.GetFlatsFromDatabase("rent", true)
+			rentalFlats := flatService.GetFlatsFromDatabase("rent", true, false)
 			c.JSON(http.StatusOK, rentalFlats)
 		})
 
 		r.GET("/idealista/get-sale-flats", func(c *gin.Context) {
-			saleFlats := flatService.GetFlatsFromDatabase("sale", false)
+			saleFlats := flatService.GetFlatsFromDatabase("sale", false, false)
 			c.JSON(http.StatusOK, saleFlats)
 		})
 
 		r.GET("/idealista/get-sale-flats/once-per-month", func(c *gin.Context) {
-			saleFlats := flatService.GetFlatsFromDatabase("sale", true)
+			saleFlats := flatService.GetFlatsFromDatabase("sale", true, false)
 			c.JSON(http.StatusOK, saleFlats)
 		})
 
@@ -53,7 +54,9 @@ func main() {
 		executionType := os.Args[1]
 
 		if executionType == "sendMonthlyReports" {
-
+			reportsService := infrastructure.NewReportsService()
+			reportsService.GetMonthlyRentalReports(flatService.GetFlatsFromDatabase("rent", true, true))
+			reportsService.GetMonthlySaleReports(flatService.GetFlatsFromDatabase("sale", true, true))
 		}
 	}
 }

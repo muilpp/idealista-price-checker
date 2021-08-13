@@ -17,9 +17,12 @@
 # IntelliJ settings
 .idea*
 
-# generated build
-idealista
-
+# Generated build
 /bin/*
+
+# Output images
+*.png
+*.gif
+
 go.sum
 credentials.env
