@@ -4,10 +4,10 @@ import "idealista/domain"
 
 type FlatRepository interface {
 	Add([]domain.Flat, string) bool
-	Get(string, bool) []domain.Flat
+	Get(string, bool, bool) []domain.Flat
 }
 
 type FlatService interface {
 	AddNewFlats() bool
-	GetFlatsFromDatabase(string, bool) []domain.Flat
+	GetFlatsFromDatabase(string, bool, bool) []domain.Flat
 }

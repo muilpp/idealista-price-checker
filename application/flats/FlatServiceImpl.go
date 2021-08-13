@@ -86,9 +86,9 @@ func (f flatServiceImpl) getFlatsFromIdealista(operation string) []domain.Flat {
 	return flats
 }
 
-func (f flatServiceImpl) GetFlatsFromDatabase(operation string, oncePerMonth bool) []domain.Flat {
+func (f flatServiceImpl) GetFlatsFromDatabase(operation string, oncePerMonth bool, isFormatDate bool) []domain.Flat {
 	log.Println("Get flats for operation ", operation)
-	flats := f.flatRepository.Get(operation, oncePerMonth)
+	flats := f.flatRepository.Get(operation, oncePerMonth, isFormatDate)
 
 	return flats
 }

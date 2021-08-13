@@ -43,13 +43,19 @@ func (f mysqlFlatRepository) Add(flats []domain.Flat, operation string) bool {
 	return true
 }
 
-func (f mysqlFlatRepository) Get(operation string, getOncePerMonthOnly bool) []domain.Flat {
+func (f mysqlFlatRepository) Get(operation string, getOncePerMonthOnly bool, isFormatDate bool) []domain.Flat {
 	db := openDB()
 	defer db.Close()
 
-	query := "select average, area_average, added from " + operation + "_average_price"
+	var query string
+	if isFormatDate {
+		query = "select average, area_average, DATE_FORMAT(added,'%b %y') from " + operation + "_average_price"
+	} else {
+		query = "select average, area_average, added from " + operation + "_average_price"
+	}
+
 	if getOncePerMonthOnly {
-		query += " where added like '%-01%'"
+		query += " where DAY(added) = 1"
 	}
 
 	log.Println("Get flats -> ", query)
