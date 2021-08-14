@@ -3,6 +3,7 @@ package main
 import (
 	service "idealista/application/flats"
 	"idealista/infrastructure"
+	"idealista/infrastructure/notification"
 	"log"
 	"net/http"
 	"os"
@@ -57,6 +58,9 @@ func main() {
 			reportsService := infrastructure.NewReportsService()
 			reportsService.GetMonthlyRentalReports(flatService.GetFlatsFromDatabase("rent", true, true))
 			reportsService.GetMonthlySaleReports(flatService.GetFlatsFromDatabase("sale", true, true))
+
+			telegramService := notification.NewTelegramNotification()
+			telegramService.SendReports()
 		}
 	}
 }
