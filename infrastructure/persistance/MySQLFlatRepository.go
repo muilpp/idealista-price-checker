@@ -43,19 +43,19 @@ func (f mysqlFlatRepository) Add(flats []domain.Flat, operation string) bool {
 	return true
 }
 
-func (f mysqlFlatRepository) Get(operation string, getOncePerMonthOnly bool, isFormatDate bool) []domain.Flat {
+func (f mysqlFlatRepository) Get(operation string, getOncePerMonthOnly bool, isFormatDate bool, flatSize string) []domain.Flat {
 	db := openDB()
 	defer db.Close()
 
 	var query string
 	if isFormatDate {
-		query = "select average, area_average, DATE_FORMAT(added,'%b %y') from " + operation + "_average_price"
+		query = "select average, area_average, size, DATE_FORMAT(added,'%b %y') from " + operation + "_average_price where size = '" + flatSize + "'"
 	} else {
-		query = "select average, area_average, added from " + operation + "_average_price"
+		query = "select average, area_average, size, added from " + operation + "_average_price where size = '" + flatSize + "'"
 	}
 
 	if getOncePerMonthOnly {
-		query += " where DAY(added) = 1"
+		query += " and DAY(added) = 1"
 	}
 
 	log.Println("Get flats -> ", query)
@@ -69,15 +69,16 @@ func (f mysqlFlatRepository) Get(operation string, getOncePerMonthOnly bool, isF
 	var average float64
 	var areaAverage float64
 	var added string
+	var size string
 	var flats []domain.Flat
 
 	for rows.Next() {
-		err := rows.Scan(&average, &areaAverage, &added)
+		err := rows.Scan(&average, &areaAverage, &size, &added)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		flat := domain.NewFlatWithDate(average, areaAverage, added)
+		flat := domain.NewFlatWithDate(average, areaAverage, size, added)
 		flats = append(flats, *flat)
 	}
 

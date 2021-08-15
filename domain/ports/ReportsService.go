@@ -6,6 +6,6 @@ const RENTAL_REPORT_MONTHLY = "rental-by-month.gif"
 const SALE_REPORT_MONTHLY = "sale-by-month.gif"
 
 type ReportsService interface {
-	GetMonthlyRentalReports([]domain.Flat)
-	GetMonthlySaleReports([]domain.Flat)
+	GetMonthlyRentalReports([]domain.Flat, []domain.Flat)
+	GetMonthlySaleReports([]domain.Flat, []domain.Flat)
 }
