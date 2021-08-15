@@ -6,6 +6,7 @@ import (
 	"idealista/domain"
 	"idealista/domain/ports"
 	"idealista/infrastructure/persistance"
+	"strconv"
 
 	"io/ioutil"
 	"log"
@@ -16,14 +17,17 @@ import (
 
 const (
 	flatEndpoint   = "https://api.idealista.com/3.5/es/search"
-	geolocation    = "41.6061846,2.2703413"
+	geolocation    = "41.6053142,2.2851149"
 	marginInMeters = "4000"
-	flatMinSize    = "75"
-	flatMaxSize    = "90"
 	propertyType   = "homes"
 	country        = "es"
 	rentType       = "rent"
 	saleType       = "sale"
+)
+
+var (
+	smallFlatSize = domain.NewFlatSize(75, 90)
+	bigFlatSize   = domain.NewFlatSize(90, 110)
 )
 
 type flatServiceImpl struct {
@@ -36,24 +40,37 @@ func NewFlatService() ports.FlatService {
 }
 
 func (f flatServiceImpl) AddNewFlats() bool {
-	rentalFlatsSlice := f.getFlatsFromIdealista(rentType)
-	saleFlatsSlice := f.getFlatsFromIdealista(saleType)
 
-	f.flatRepository.Add(rentalFlatsSlice, rentType)
-	f.flatRepository.Add(saleFlatsSlice, saleType)
+	rentalSmallFlatsSlice := f.getFlatsFromIdealista(rentType, smallFlatSize)
+	saleSmallFlatsSlice := f.getFlatsFromIdealista(saleType, smallFlatSize)
+
+	rentalBigFlatsSlice := f.getFlatsFromIdealista(rentType, bigFlatSize)
+	saleBigFlatsSlice := f.getFlatsFromIdealista(saleType, bigFlatSize)
+
+	f.flatRepository.Add(rentalSmallFlatsSlice, rentType, smallFlatSize.GetMinSize())
+	f.flatRepository.Add(saleSmallFlatsSlice, saleType, smallFlatSize.GetMinSize())
+
+	f.flatRepository.Add(rentalBigFlatsSlice, rentType, bigFlatSize.GetMinSize())
+	f.flatRepository.Add(saleBigFlatsSlice, saleType, bigFlatSize.GetMinSize())
 
 	return true
 }
 
-func (f flatServiceImpl) getFlatsFromIdealista(operation string) []domain.Flat {
+func (f flatServiceImpl) getFlatsFromIdealista(operation string, flatSize *domain.FlatSize) []domain.Flat {
 	data := url.Values{}
 	data.Set("country", country)
 	data.Set("operation", operation)
 	data.Set("propertyType", propertyType)
 	data.Set("center", geolocation)
 	data.Set("distance", marginInMeters)
-	data.Set("minSize", flatMinSize)
-	data.Set("maxSize", flatMaxSize)
+	data.Set("minSize", strconv.Itoa(flatSize.GetMinSize()))
+	data.Set("maxSize", strconv.Itoa(flatSize.GetMaxSize()))
+
+	if flatSize.GetMaxSize() == bigFlatSize.GetMaxSize() {
+		data.Set("bedrooms", "3")
+		data.Set("terrance", "1")
+		data.Set("maxItems", "50")
+	}
 
 	var bearer = "Bearer " + f.authentication.GetToken()
 
@@ -68,7 +85,7 @@ func (f flatServiceImpl) getFlatsFromIdealista(operation string) []domain.Flat {
 	}
 
 	body, _ := ioutil.ReadAll(resp.Body)
-	// log.Println(string([]byte(body)))
+	log.Println(string([]byte(body)))
 
 	var flatList domain.FlatList
 	var flats []domain.Flat
@@ -89,5 +106,5 @@ func (f flatServiceImpl) getFlatsFromIdealista(operation string) []domain.Flat {
 func (f flatServiceImpl) GetFlatsFromDatabase(operation string, oncePerMonth bool, isFormatDate bool) ([]domain.Flat, []domain.Flat) {
 	log.Println("Get flats for operation ", operation)
 
-	return f.flatRepository.Get(operation, oncePerMonth, isFormatDate, "75"), f.flatRepository.Get(operation, oncePerMonth, isFormatDate, "90")
+	return f.flatRepository.Get(operation, oncePerMonth, isFormatDate, smallFlatSize.GetMinSize()), f.flatRepository.Get(operation, oncePerMonth, isFormatDate, bigFlatSize.GetMinSize())
 }

@@ -7,6 +7,7 @@ import (
 	"idealista/domain/ports"
 	"log"
 	"os"
+	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -17,24 +18,20 @@ func NewFlatRepository() ports.FlatRepository {
 	return &mysqlFlatRepository{}
 }
 
-func (f mysqlFlatRepository) Add(flats []domain.Flat, operation string) bool {
+func (f mysqlFlatRepository) Add(flats []domain.Flat, operation string, flatSize int) bool {
 	db := openDB()
 	defer db.Close()
 
 	var totalSumPrice, totalSumAreaPrice float64
 	for _, flat := range flats {
-		insert, err := db.Query("INSERT INTO " + operation + "_flat_prices (price, area_price) VALUES ('" + fmt.Sprintf("%f", flat.Price) + "', '" + fmt.Sprintf("%f", flat.AreaPrice) + "')")
-		if err != nil {
-			panic(err.Error())
-		}
-		defer insert.Close()
 		totalSumPrice += flat.Price
 		totalSumAreaPrice += flat.AreaPrice
 	}
 
 	averagePrice := totalSumPrice / float64(len(flats))
 	averageAreaPrice := totalSumAreaPrice / float64(len(flats))
-	insert, err := db.Query("INSERT INTO " + operation + "_average_price (average, area_average) VALUES ('" + fmt.Sprintf("%f", averagePrice) + "', '" + fmt.Sprintf("%f", averageAreaPrice) + "')")
+
+	insert, err := db.Query("INSERT INTO " + operation + "_average_price (average, area_average, size) VALUES ('" + fmt.Sprintf("%f", averagePrice) + "', '" + fmt.Sprintf("%f", averageAreaPrice) + "', '" + strconv.Itoa(flatSize) + "')")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -43,15 +40,15 @@ func (f mysqlFlatRepository) Add(flats []domain.Flat, operation string) bool {
 	return true
 }
 
-func (f mysqlFlatRepository) Get(operation string, getOncePerMonthOnly bool, isFormatDate bool, flatSize string) []domain.Flat {
+func (f mysqlFlatRepository) Get(operation string, getOncePerMonthOnly bool, isFormatDate bool, flatSize int) []domain.Flat {
 	db := openDB()
 	defer db.Close()
 
 	var query string
 	if isFormatDate {
-		query = "select average, area_average, size, DATE_FORMAT(added,'%b %y') from " + operation + "_average_price where size = '" + flatSize + "'"
+		query = "select average, area_average, size, DATE_FORMAT(added,'%b %y') from " + operation + "_average_price where size = '" + strconv.Itoa(flatSize) + "'"
 	} else {
-		query = "select average, area_average, size, added from " + operation + "_average_price where size = '" + flatSize + "'"
+		query = "select average, area_average, size, added from " + operation + "_average_price where size = '" + strconv.Itoa(flatSize) + "'"
 	}
 
 	if getOncePerMonthOnly {
@@ -78,7 +75,7 @@ func (f mysqlFlatRepository) Get(operation string, getOncePerMonthOnly bool, isF
 			log.Fatal(err)
 		}
 
-		flat := domain.NewFlatWithDate(average, areaAverage, size, added)
+		flat := domain.NewFlatWithDate(average, areaAverage, added)
 		flats = append(flats, *flat)
 	}
 

@@ -118,7 +118,7 @@ func equalizeFlatSlices(small []domain.Flat, big []domain.Flat, stepValue float6
 	i := 0
 	for len(small) > len(big) {
 		flat := small[i]
-		big = append([]domain.Flat{*domain.NewFlatWithDate(lowestIndex, 0, flat.Size, flat.Date)}, big...)
+		big = append([]domain.Flat{*domain.NewFlatWithDate(lowestIndex, 0, flat.Date)}, big...)
 		i++
 	}
 

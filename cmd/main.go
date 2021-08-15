@@ -32,14 +32,16 @@ func main() {
 	} else {
 		executionType := os.Args[1]
 
+		flatService := service.NewFlatService()
 		if executionType == "sendMonthlyReports" {
-			flatService := service.NewFlatService()
 			reportsService := infrastructure.NewReportsService()
 			reportsService.GetMonthlyRentalReports(flatService.GetFlatsFromDatabase("rent", true, true))
 			reportsService.GetMonthlySaleReports(flatService.GetFlatsFromDatabase("sale", true, true))
 
 			telegramService := notification.NewTelegramNotification()
 			telegramService.SendReports()
+		} else if executionType == "addFlats" {
+			flatService.AddNewFlats()
 		}
 	}
 }

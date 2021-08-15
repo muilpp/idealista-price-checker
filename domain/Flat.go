@@ -8,7 +8,6 @@ type Flat struct {
 	Price     float64 `json:"price"`
 	AreaPrice float64 `json:"priceByArea"`
 	Date      string  `json:"date"`
-	Size      string  `json:"size"`
 }
 
 func NewFlat(totalPrice, areaPrice float64) *Flat {
@@ -18,11 +17,10 @@ func NewFlat(totalPrice, areaPrice float64) *Flat {
 	return f
 }
 
-func NewFlatWithDate(totalPrice, areaPrice float64, size string, date string) *Flat {
+func NewFlatWithDate(totalPrice, areaPrice float64, date string) *Flat {
 	f := new(Flat)
 	f.Price = totalPrice
 	f.AreaPrice = areaPrice
 	f.Date = date
-	f.Size = size
 	return f
 }
