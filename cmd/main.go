@@ -35,8 +35,8 @@ func main() {
 		flatService := service.NewFlatService()
 		if executionType == "sendMonthlyReports" {
 			reportsService := infrastructure.NewReportsService()
-			reportsService.GetMonthlyRentalReports(flatService.GetFlatsFromDatabase("rent", true, true))
-			reportsService.GetMonthlySaleReports(flatService.GetFlatsFromDatabase("sale", true, true))
+			reportsService.GetMonthlyRentalReports(flatService.GetFlatsFromDatabase("rent", true))
+			reportsService.GetMonthlySaleReports(flatService.GetFlatsFromDatabase("sale", true))
 
 			telegramService := notification.NewTelegramNotification()
 			telegramService.SendReports()

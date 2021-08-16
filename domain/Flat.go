@@ -5,6 +5,7 @@ type FlatList struct {
 }
 
 type Flat struct {
+	Location  string   `json:"-"`
 	AreaId    int      `json:"-"`
 	Price     float64  `json:"price"`
 	AreaPrice float64  `json:"priceByArea"`
@@ -21,8 +22,9 @@ func NewFlat(areaId int, totalPrice float64, areaPrice float64, size FlatSize) *
 	return f
 }
 
-func NewFlatWithDate(totalPrice, areaPrice float64, date string) *Flat {
+func NewFlatWithDate(location string, totalPrice float64, areaPrice float64, date string) *Flat {
 	f := new(Flat)
+	f.Location = location
 	f.Price = totalPrice
 	f.AreaPrice = areaPrice
 	f.Date = date

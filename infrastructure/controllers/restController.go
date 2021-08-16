@@ -16,24 +16,24 @@ func AddFlat(c *gin.Context) {
 
 func GetRentalFlats(c *gin.Context) {
 	flatService := service.NewFlatService()
-	rentalFlats, _ := flatService.GetFlatsFromDatabase("rent", false, false)
+	rentalFlats := flatService.GetFlatsFromDatabase("rent", false)
 	c.JSON(http.StatusOK, rentalFlats)
 }
 
 func GetRentalFlatsOncePerMonth(c *gin.Context) {
 	flatService := service.NewFlatService()
-	rentalFlats, _ := flatService.GetFlatsFromDatabase("rent", true, false)
+	rentalFlats := flatService.GetFlatsFromDatabase("rent", true)
 	c.JSON(http.StatusOK, rentalFlats)
 }
 
 func GetSaleFlats(c *gin.Context) {
 	flatService := service.NewFlatService()
-	saleFlats, _ := flatService.GetFlatsFromDatabase("sale", false, false)
+	saleFlats := flatService.GetFlatsFromDatabase("sale", false)
 	c.JSON(http.StatusOK, saleFlats)
 }
 
 func GetSaleFlatsOncePerMonth(c *gin.Context) {
 	flatService := service.NewFlatService()
-	saleFlats, _ := flatService.GetFlatsFromDatabase("sale", true, false)
+	saleFlats := flatService.GetFlatsFromDatabase("sale", true)
 	c.JSON(http.StatusOK, saleFlats)
 }

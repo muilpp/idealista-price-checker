@@ -20,79 +20,76 @@ func NewReportsService() ports.ReportsService {
 	return &GraphReports{}
 }
 
-func (rs GraphReports) GetMonthlyRentalReports(smallFlatSlice []domain.Flat, bigFlatSlice []domain.Flat) {
-	if len(smallFlatSlice) == 0 || len(bigFlatSlice) == 0 {
-		log.Println("Rental flats not found: ", len(smallFlatSlice), len(bigFlatSlice))
+func (rs GraphReports) GetMonthlyRentalReports(allFlats [][]domain.Flat) {
+
+	if len(allFlats) == 0 {
+		log.Println("Rental flats not found")
 		return
 	}
 
-	rs.printValuesToFile(smallFlatSlice, bigFlatSlice, ports.RENTAL_REPORT_MONTHLY)
+	rs.printValuesToFile(allFlats, ports.RENTAL_REPORT_MONTHLY)
+
 }
 
-func (rs GraphReports) GetMonthlySaleReports(smallFlatSlice []domain.Flat, bigFlatSlice []domain.Flat) {
-	if len(smallFlatSlice) == 0 || len(bigFlatSlice) == 0 {
-		log.Println("Sale flats not found: ", len(smallFlatSlice), len(bigFlatSlice))
+func (rs GraphReports) GetMonthlySaleReports(allFlats [][]domain.Flat) {
+	if len(allFlats) == 0 {
+		log.Println("Sale flats not found")
 		return
 	}
 
-	rs.printValuesToFile(smallFlatSlice, bigFlatSlice, ports.SALE_REPORT_MONTHLY)
+	rs.printValuesToFile(allFlats, ports.SALE_REPORT_MONTHLY)
+
 }
 
-func (rs GraphReports) printValuesToFile(smallFlatSlice []domain.Flat, bigFlatSlice []domain.Flat, fileName string) {
+func (rs GraphReports) printValuesToFile(allFlats [][]domain.Flat, fileName string) {
 	var title string
 	var stepValue int
 	if strings.Contains(fileName, ports.RENTAL_REPORT_MONTHLY) {
-		title = "Rent in Granollers"
+		title = "Montly Rent"
 		stepValue = 50
 	} else {
-		title = "Sale in Granollers"
+		title = "Monthly Sale"
 		stepValue = 10000
 
 	}
-	if len(smallFlatSlice) > len(bigFlatSlice) {
-		smallFlatSlice, bigFlatSlice = equalizeFlatSlices(smallFlatSlice, bigFlatSlice, float64(stepValue))
+
+	var chartSeries []chart.Series
+	var joinedFlats []domain.Flat
+	for _, flatSlice := range allFlats {
+		joinedFlats = append(joinedFlats, flatSlice...)
+
+		xValuesToPlot, yValuesToPlot := getAxisValuesToPlot(flatSlice)
+		chartSerie := chart.ContinuousSeries{
+			Name:    flatSlice[0].Location + " " + strconv.Itoa(flatSlice[0].Size.GetMinSize()) + " to " + strconv.Itoa(flatSlice[0].Size.GetMaxSize()) + " 90m2",
+			XValues: xValuesToPlot,
+			YValues: yValuesToPlot,
+			Style: chart.Style{
+				StrokeColor: chart.ColorGreen,
+				FillColor:   chart.ColorGreen.WithAlpha(64),
+			},
+		}
+
+		chartSeries = append(chartSeries, chartSerie)
 	}
 
-	smallXValuesToPlot, smallYValuesToPlot := getAxisValuesToPlot(smallFlatSlice)
-	bigXValuesToPlot, bigYValuesToPlot := getAxisValuesToPlot(bigFlatSlice)
-	chartValues := getChartValues(smallFlatSlice)
+	chartValues := getChartValues(allFlats[0])
 
-	sortSlices(smallFlatSlice, bigFlatSlice)
-
-	tickSlice := getYAxisLabels(bigFlatSlice, float64(stepValue))
+	sortSlices(joinedFlats)
+	tickSlice := getYAxisLabels(joinedFlats, float64(stepValue))
 
 	graph := chart.Chart{
 		Title: title,
 		YAxis: chart.YAxis{
 			Range: &chart.ContinuousRange{
-				Min: bigFlatSlice[len(bigFlatSlice)-1].Price,
-				Max: bigFlatSlice[0].Price,
+				Min: joinedFlats[len(joinedFlats)-1].Price,
+				Max: joinedFlats[0].Price,
 			},
 			Ticks: tickSlice,
 		},
 		XAxis: chart.XAxis{
 			Ticks: chartValues,
 		},
-		Series: []chart.Series{
-			chart.ContinuousSeries{
-				Name:    "75 to 90m2",
-				XValues: smallXValuesToPlot,
-				YValues: smallYValuesToPlot,
-				Style: chart.Style{
-					StrokeColor: chart.ColorGreen,
-					FillColor:   chart.ColorGreen.WithAlpha(64),
-				},
-			},
-			chart.ContinuousSeries{
-				Name:    "90 to 110m2",
-				XValues: bigXValuesToPlot,
-				YValues: bigYValuesToPlot,
-				Style: chart.Style{
-					StrokeColor: chart.ColorRed,
-					FillColor:   chart.ColorRed.WithAlpha(64),
-				},
-			},
-		},
+		Series: chartSeries,
 	}
 
 	graph.Elements = []chart.Renderable{
@@ -118,7 +115,7 @@ func equalizeFlatSlices(small []domain.Flat, big []domain.Flat, stepValue float6
 	i := 0
 	for len(small) > len(big) {
 		flat := small[i]
-		big = append([]domain.Flat{*domain.NewFlatWithDate(lowestIndex, 0, flat.Date)}, big...)
+		big = append([]domain.Flat{*domain.NewFlatWithDate(big[i].Location, lowestIndex, 0, flat.Date)}, big...)
 		i++
 	}
 
@@ -163,12 +160,8 @@ func getChartValues(flatSlice []domain.Flat) []chart.Tick {
 	return chartTick
 }
 
-func sortSlices(smallFlatSlice []domain.Flat, bigFlatSlice []domain.Flat) {
-	sort.Slice(smallFlatSlice, func(i, j int) bool {
-		return smallFlatSlice[i].Price > smallFlatSlice[j].Price
-	})
-
-	sort.Slice(bigFlatSlice, func(i, j int) bool {
-		return bigFlatSlice[i].Price > bigFlatSlice[j].Price
+func sortSlices(flatSlice []domain.Flat) {
+	sort.Slice(flatSlice, func(i, j int) bool {
+		return flatSlice[i].Price > flatSlice[j].Price
 	})
 }

@@ -99,8 +99,8 @@ func (f flatServiceImpl) getPlacesToSearch() []domain.Place {
 	return f.flatRepository.GetPlacesToSearch()
 }
 
-func (f flatServiceImpl) GetFlatsFromDatabase(operation string, oncePerMonth bool, isFormatDate bool) ([]domain.Flat, []domain.Flat) {
+func (f flatServiceImpl) GetFlatsFromDatabase(operation string, oncePerMonth bool) [][]domain.Flat {
 	log.Println("Get flats for operation ", operation)
 
-	return f.flatRepository.Get(operation, oncePerMonth, isFormatDate, smallFlatSize.GetMinSize()), f.flatRepository.Get(operation, oncePerMonth, isFormatDate, bigFlatSize.GetMinSize())
+	return f.flatRepository.Get(operation, oncePerMonth)
 }
