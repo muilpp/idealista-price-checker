@@ -60,7 +60,7 @@ func (f mysqlFlatRepository) Get(operation string, getOncePerMonthOnly bool) [][
 		//query = "select average, area_average, size, DATE_FORMAT(added,'%b %y') from " + operation + "_average_price where size = '" + strconv.Itoa(flatSize) + "'"
 
 		if getOncePerMonthOnly {
-			query += " and DAY(added) = 1"
+			query += " and DAY(s.added) = 1"
 		}
 
 		log.Println("Get flats -> ", query)
@@ -75,16 +75,17 @@ func (f mysqlFlatRepository) Get(operation string, getOncePerMonthOnly bool) [][
 		var average float64
 		var areaAverage float64
 		var added string
-		var size string
+		var minSize int
+		var maxSize int
 		var flats []domain.Flat
 
 		for rows.Next() {
-			err := rows.Scan(&name, &average, &areaAverage, &size, &added)
+			err := rows.Scan(&name, &average, &areaAverage, &minSize, &maxSize, &added)
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			flat := domain.NewFlatWithDate(name, average, areaAverage, added)
+			flat := domain.NewFlatWithDate(name, average, areaAverage, added, *domain.NewFlatSize(minSize, maxSize))
 			flats = append(flats, *flat)
 		}
 

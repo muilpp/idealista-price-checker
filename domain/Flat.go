@@ -22,11 +22,12 @@ func NewFlat(areaId int, totalPrice float64, areaPrice float64, size FlatSize) *
 	return f
 }
 
-func NewFlatWithDate(location string, totalPrice float64, areaPrice float64, date string) *Flat {
+func NewFlatWithDate(location string, totalPrice float64, areaPrice float64, date string, size FlatSize) *Flat {
 	f := new(Flat)
 	f.Location = location
 	f.Price = totalPrice
 	f.AreaPrice = areaPrice
 	f.Date = date
+	f.Size = size
 	return f
 }

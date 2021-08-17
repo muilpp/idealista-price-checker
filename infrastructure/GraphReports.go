@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/wcharczuk/go-chart/v2"
+	"github.com/wcharczuk/go-chart/v2/drawing"
 )
 
 type GraphReports struct {
@@ -49,23 +50,25 @@ func (rs GraphReports) printValuesToFile(allFlats [][]domain.Flat, fileName stri
 		stepValue = 50
 	} else {
 		title = "Monthly Sale"
-		stepValue = 10000
+		stepValue = 20000
 
 	}
 
+	colorSlice := []drawing.Color{chart.ColorGreen, chart.ColorRed, chart.ColorYellow, chart.ColorBlue, chart.ColorOrange, chart.ColorBlack, chart.ColorCyan, chart.ColorAlternateGreen, chart.ColorAlternateBlue, chart.ColorAlternateGray, chart.ColorAlternateYellow}
+
 	var chartSeries []chart.Series
 	var joinedFlats []domain.Flat
-	for _, flatSlice := range allFlats {
+	for i, flatSlice := range allFlats {
 		joinedFlats = append(joinedFlats, flatSlice...)
 
 		xValuesToPlot, yValuesToPlot := getAxisValuesToPlot(flatSlice)
 		chartSerie := chart.ContinuousSeries{
-			Name:    flatSlice[0].Location + " " + strconv.Itoa(flatSlice[0].Size.GetMinSize()) + " to " + strconv.Itoa(flatSlice[0].Size.GetMaxSize()) + " 90m2",
+			Name:    flatSlice[0].Location + " " + strconv.Itoa(flatSlice[0].Size.GetMinSize()) + " to " + strconv.Itoa(flatSlice[0].Size.GetMaxSize()) + "m2",
 			XValues: xValuesToPlot,
 			YValues: yValuesToPlot,
 			Style: chart.Style{
-				StrokeColor: chart.ColorGreen,
-				FillColor:   chart.ColorGreen.WithAlpha(64),
+				StrokeColor: colorSlice[i],
+				//FillColor:   colorSlice[i].WithAlpha(64),
 			},
 		}
 
@@ -115,7 +118,7 @@ func equalizeFlatSlices(small []domain.Flat, big []domain.Flat, stepValue float6
 	i := 0
 	for len(small) > len(big) {
 		flat := small[i]
-		big = append([]domain.Flat{*domain.NewFlatWithDate(big[i].Location, lowestIndex, 0, flat.Date)}, big...)
+		big = append([]domain.Flat{*domain.NewFlatWithDate(big[i].Location, lowestIndex, 0, flat.Date, *domain.NewFlatSize(big[i].Size.GetMinSize(), big[i].Size.GetMaxSize()))}, big...)
 		i++
 	}
 
