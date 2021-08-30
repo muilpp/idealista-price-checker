@@ -3,7 +3,9 @@ package main
 import (
 	"idealista/adapter/in/controllers"
 	"idealista/adapter/out/notification"
+	"idealista/adapter/out/persistance"
 	"idealista/adapter/out/reports"
+	"idealista/application/authentication"
 	service "idealista/application/flats"
 	"log"
 	"os"
@@ -31,8 +33,8 @@ func main() {
 		r.Run(":8383")
 	} else {
 		executionType := os.Args[1]
+		var flatService = service.NewFlatService(persistance.NewFlatRepository(), authentication.NewAuthenticationService())
 
-		flatService := service.NewFlatService()
 		if executionType == "sendMonthlyReports" {
 			reportsService := reports.NewReportsService()
 			reportsService.GetMonthlyRentalReports(flatService.GetFlatsFromDatabase("rent", true))
