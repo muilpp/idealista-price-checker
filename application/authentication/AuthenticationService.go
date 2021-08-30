@@ -2,6 +2,7 @@ package authentication
 
 import (
 	"encoding/json"
+	"idealista/domain/ports"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -12,11 +13,7 @@ import (
 
 const authEndpoint = "https://api.idealista.com/oauth/token"
 
-type AuthenticationService interface {
-	GetToken() string
-}
-
-func NewAuthenticationService() AuthenticationService {
+func NewAuthenticationService() ports.AuthenticationService {
 	return &authentication{}
 }
 

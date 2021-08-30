@@ -2,8 +2,6 @@ package application
 
 import (
 	"encoding/json"
-	"idealista/adapter/out/persistance"
-	"idealista/application/authentication"
 	"idealista/domain"
 	"idealista/domain/ports"
 	"strconv"
@@ -24,11 +22,11 @@ const (
 
 type flatServiceImpl struct {
 	flatRepository ports.FlatRepository
-	authentication authentication.AuthenticationService
+	authentication ports.AuthenticationService
 }
 
-func NewFlatService() ports.FlatService {
-	return &flatServiceImpl{persistance.NewFlatRepository(), authentication.NewAuthenticationService()}
+func NewFlatService(repo ports.FlatRepository, auth ports.AuthenticationService) ports.FlatService {
+	return &flatServiceImpl{repo, auth}
 }
 
 func (f flatServiceImpl) AddNewFlats() bool {
