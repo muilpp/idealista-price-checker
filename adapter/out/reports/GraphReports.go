@@ -1,4 +1,4 @@
-package infrastructure
+package reports
 
 import (
 	"idealista/domain"
@@ -63,7 +63,7 @@ func (rs GraphReports) printValuesToFile(allFlats [][]domain.Flat, fileName stri
 
 		xValuesToPlot, yValuesToPlot := getAxisValuesToPlot(flatSlice)
 		chartSerie := chart.ContinuousSeries{
-			Name:    flatSlice[0].Location + " " + strconv.Itoa(flatSlice[0].Size.GetMinSize()) + " to " + strconv.Itoa(flatSlice[0].Size.GetMaxSize()) + "m2",
+			Name:    flatSlice[0].Location + " " + strconv.Itoa(flatSlice[0].Size.GetMinSize()) + " to " + strconv.Itoa(flatSlice[0].Size.GetMaxSize()) + "m²",
 			XValues: xValuesToPlot,
 			YValues: yValuesToPlot,
 			Style: chart.Style{

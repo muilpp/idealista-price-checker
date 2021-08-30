@@ -2,10 +2,10 @@ package application
 
 import (
 	"encoding/json"
+	"idealista/adapter/out/persistance"
 	"idealista/application/authentication"
 	"idealista/domain"
 	"idealista/domain/ports"
-	"idealista/infrastructure/persistance"
 	"strconv"
 
 	"io/ioutil"
@@ -20,11 +20,6 @@ const (
 	propertyType = "homes"
 	country      = "es"
 	maxItems     = "50"
-)
-
-var (
-	smallFlatSize = domain.NewFlatSize(75, 90)
-	bigFlatSize   = domain.NewFlatSize(90, 110)
 )
 
 type flatServiceImpl struct {

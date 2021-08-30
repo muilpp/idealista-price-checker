@@ -1,10 +1,10 @@
 package main
 
 import (
+	"idealista/adapter/in/controllers"
+	"idealista/adapter/out/notification"
+	"idealista/adapter/out/reports"
 	service "idealista/application/flats"
-	"idealista/infrastructure"
-	"idealista/infrastructure/controllers"
-	"idealista/infrastructure/notification"
 	"log"
 	"os"
 
@@ -34,7 +34,7 @@ func main() {
 
 		flatService := service.NewFlatService()
 		if executionType == "sendMonthlyReports" {
-			reportsService := infrastructure.NewReportsService()
+			reportsService := reports.NewReportsService()
 			reportsService.GetMonthlyRentalReports(flatService.GetFlatsFromDatabase("rent", true))
 			reportsService.GetMonthlySaleReports(flatService.GetFlatsFromDatabase("sale", true))
 
