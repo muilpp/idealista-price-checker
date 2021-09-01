@@ -22,9 +22,10 @@ func (f mysqlFlatRepository) Add(allFlats [][]domain.Flat) bool {
 	db := openDB()
 	defer db.Close()
 
-	var totalSumPrice, totalSumAreaPrice float64
 	for _, flatSlice := range allFlats {
 
+		totalSumPrice := 0.0
+		totalSumAreaPrice := 0.0
 		for _, flat := range flatSlice {
 			totalSumPrice += flat.Price
 			totalSumAreaPrice += flat.AreaPrice
@@ -33,7 +34,7 @@ func (f mysqlFlatRepository) Add(allFlats [][]domain.Flat) bool {
 		averagePrice := totalSumPrice / float64(len(flatSlice))
 		averageAreaPrice := totalSumAreaPrice / float64(len(flatSlice))
 
-		insert, err := db.Query("INSERT INTO sale_average_price (place_id, average, area_average, min_size, max_size) VALUES ('" + strconv.Itoa(flatSlice[0].AreaId) + "', '" + fmt.Sprintf("%f", averagePrice) + "', '" + fmt.Sprintf("%f", averageAreaPrice) + "', '" + strconv.Itoa(flatSlice[0].Size.GetMinSize()) + "', '" + strconv.Itoa(flatSlice[0].Size.GetMaxSize()) + "'")
+		insert, err := db.Query("INSERT INTO sale_average_price (place_id, average, area_average, min_size, max_size) VALUES ('" + fmt.Sprintf("%d", flatSlice[0].AreaId) + "', '" + fmt.Sprintf("%f", averagePrice) + "', '" + fmt.Sprintf("%f", averageAreaPrice) + "', '" + fmt.Sprintf("%d", flatSlice[0].Size.GetMinSize()) + "', '" + fmt.Sprintf("%d", flatSlice[0].Size.GetMaxSize()) + "')")
 		if err != nil {
 			panic(err.Error())
 		}
