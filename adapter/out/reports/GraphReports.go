@@ -14,6 +14,8 @@ import (
 	"github.com/wcharczuk/go-chart/v2/drawing"
 )
 
+const STEP_BETWEEN_FLATS = 2
+
 type GraphReports struct {
 }
 
@@ -145,9 +147,10 @@ func getAxisValuesToPlot(flatSlice []domain.Flat) ([]float64, []float64) {
 
 	var xValueSlice []float64
 	var yValueSlice []float64
-	for i, v := range flatSlice {
+
+	for i := getFirstIndex(flatSlice); i < len(flatSlice); i = i + STEP_BETWEEN_FLATS {
 		xValueSlice = append(xValueSlice, float64(i))
-		yValueSlice = append(yValueSlice, v.Price)
+		yValueSlice = append(yValueSlice, flatSlice[i].Price)
 	}
 
 	return xValueSlice, yValueSlice
@@ -156,8 +159,9 @@ func getAxisValuesToPlot(flatSlice []domain.Flat) ([]float64, []float64) {
 func getChartValues(flatSlice []domain.Flat) []chart.Tick {
 
 	var chartTick []chart.Tick
-	for i, v := range flatSlice {
-		chartTick = append(chartTick, chart.Tick{Value: float64(i), Label: v.Date})
+
+	for i := getFirstIndex(flatSlice); i < len(flatSlice); i = i + STEP_BETWEEN_FLATS {
+		chartTick = append(chartTick, chart.Tick{Value: float64(i), Label: flatSlice[i].Date})
 	}
 
 	return chartTick
@@ -167,4 +171,12 @@ func sortSlices(flatSlice []domain.Flat) {
 	sort.Slice(flatSlice, func(i, j int) bool {
 		return flatSlice[i].Price > flatSlice[j].Price
 	})
+}
+
+func getFirstIndex(flatSlice []domain.Flat) int {
+	if math.Mod(float64(len(flatSlice)), STEP_BETWEEN_FLATS) != 0 {
+		return 0
+	}
+
+	return 1
 }
